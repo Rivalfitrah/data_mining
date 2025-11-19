@@ -1,7 +1,7 @@
 ---
-title: "Klasifikasi Tingkat Keparahan COVID-19"
-subtitle: "Algoritma Random Forest"
-author: "Kelompok 14"
+title: "Analisis Segementasi dan Prediksi Churn Pengguna Spotify Berbasis Data Spotify Customer Churn Menggunakan Algoritma Random Forest"
+subtitle: "Proyek Data Mining - Kelompok 12"
+author: " Rival Fitrah Dermawa, Hotniel Diasi Sianturi, Anwar Faiz Fauzi"
 date: "`r Sys.Date()`"
 output:
   revealjs::revealjs_presentation:
@@ -15,353 +15,312 @@ output:
 /* 1. IMPORT FONT POPPINS */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
-/* 2. PENGATURAN FONT GLOBAL (YANG DIUBAH) */
-.reveal, .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal p, .reveal li {
+:root {
+  --spotify-green: #1DB954;
+  --spotify-black: #191414;
+  --spotify-dark: #121212;
+  --spotify-grey: #b3b3b3;
+}
+
+/* Background keseluruhan */
+.reveal {
+  background-color: var(--spotify-black) !important;
+  color: #ffffff !important;
+}
+
+/* Font global */
+.reveal, .reveal h1, .reveal h2, .reveal h3, .reveal p, .reveal li {
   font-family: 'Poppins', sans-serif !important;
-  color: #333;
 }
 
-/* Mengatur ukuran teks isi (list & paragraf) menjadi lebih kecil */
-.reveal p, .reveal li {
-  font-size: 24px !important; /* Ukuran font diperkecil (Standar revealjs biasanya 30px+) */
-  line-height: 1.6 !important; /* Jarak antar baris diperlebar agar rapi */
-}
-
-/* 3. JUDUL SLIDE (DIPERKECIL) */
-.reveal h3 {
-  font-size: 1.3em !important; /* Ukuran judul diperkecil */
-  color: #1565c0;
+/* Heading */
+.reveal h1, .reveal h2, .reveal h3 {
+  color: var(--spotify-green) !important;
+  font-weight: 700 !important;
   text-transform: none;
-  font-weight: 600;
-  border-bottom: 2px solid #e3f2fd;
-  padding-bottom: 10px;
-  margin-bottom: 20px !important;
 }
 
-/* 4. OTOMATISASI KOTAK BIRU */
+/* Title slide */
+#title-slide h1 {
+  font-size: 1.4em !important;
+  color: var(--spotify-green) !important;
+}
+#title-slide .subtitle {
+  color: #ffffff !important;
+  font-size: 1.0em !important;
+}
+#title-slide .author {
+  font-size: 0.9em !important;
+  color: var(--spotify-grey) !important;
+}
+#title-slide .date {
+  color: var(--spotify-grey) !important;
+}
+
+/* List / bullet box */
 .reveal .slides section ul, 
 .reveal .slides section ol {
-  background-color: #e3f2fd;
-  border-left: 6px solid #1565c0;
-  padding: 15px 25px; /* Padding sedikit dikurangi */
+  background-color: var(--spotify-dark) !important;
+  border-left: 6px solid var(--spotify-green) !important;
+  padding: 15px 25px;
   border-radius: 8px;
-  display: block;
-  width: 90%; 
+  width: 90%;
   margin: 0 auto;
-  text-align: left;
-  box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0px 0px 12px rgba(29, 185, 84, 0.15);
 }
 
-.reveal .slides section li {
-  margin-bottom: 8px; /* Jarak antar poin */
+/* Tulisan list */
+.reveal li, .reveal p {
+  font-size: 24px !important;
+  color: #ffffff !important;
 }
 
-/* 5. KHUSUS JUDUL TENGAH BESAR (Algoritma Klasifikasi) */
-.center-title {
-  margin-top: 10%;
-  text-align: center;
-}
+/* Center title (section besar) */
 .center-title h1 {
-  color: #1565c0;
-  font-weight: bold;
-  font-size: 1.8em !important; /* SAYA PERKECIL DARI 2.5em KE 1.8em AGAR MUAT */
-  line-height: 1.2 !important;
+  color: var(--spotify-green) !important;
+  font-size: 1.8em !important;
 }
 .center-title h3 {
+  color: var(--spotify-grey) !important;
   font-size: 1.0em !important;
-  color: #555;
-  border: none;
 }
+
 </style>
 
 ### Latar Belakang Masalah
 
-- COVID-19 adalah tantangan besar dalam deteksi dan penanganan pasien di skala global.
-- Gejala seperti demam, batuk, dan kesulitan bernapas adalah indikator tingkat keparahan.
-- Kombinasi gejala sering kompleks dan membutuhkan analisis sistematis.
-- Data mining meningkatkan akurasi skrining dan klasifikasi pasien.
-- Data gejala & demografi standar WHO mendukung pengambilan keputusan klinis.
+-  Pelanggan dapat dengan mudah menggunakan haknya untuk berpindah penyedia layanan dari satu aplikasi ke aplikasi lainnya.
+-  Churn pelanggan mengacu pada kehilangan pelanggan berkala dalam sebuah organisasi.
+-  Aktivitas churn sangat berpengaruh terhadap total profit dan citra bisnis, sehingga sebaiknya dapat diprediksi dan dicegah.
+- Data mining  mengidentifikasi churnes lebih awal sebelum mereka pindah.
+
 
 ---
 
 ### Sumber dan Karakteristik Data
 
-- **Sumber:** Dataset publik "COVID-19 Symptoms and Severity".
-- **Dasar:** Berdasarkan pedoman WHO & Kemenkes India, difokuskan pada gejala standar.
+- **Sumber:** Dataset publik *Spotify Customer Churn* (Kaggle)
+- **Dasar:** Berisi informasi demografi, perilaku mendengarkan, dan status langganan pengguna.
 
 ---
 
 ### Karakteristik Data
 
-- **Jumlah Data:** 316,800 kombinasi unik (kategori)
+- **Jumlah Data:** 1,000 kombinasi unik (kategori)
 - **Struktur:** File CSV
-- **Tipe Data:** Semua variabel kategorikal
+- **Tipe Data:** Campuran kategorikal & numerik 
 
 ---
 
 ### Variabel Dalam Dataset (1/2)
 
-**Demografis & Konteks:**
-- Country (kategorikal)
-- Age (kelompok usia, kategorikal)
-- Contact (riwayat kontak, binary)
+**Informasi Langganan:**
 
-**Gejala Utama WHO:**
-- Fever (binary)
-- Tiredness (binary)
-- Difficulty-in-breathing (binary)
+- subscription_type (kategorikal)
+- country (kategorikal)
+
+**Aktivitas Mendengarkan:**
+
+- avg_daily_minutes (numeric)
+- number_of_playlists (integer)
+- top_genre (kategorikal)
+- skips_per_day (integer)
 
 ---
 
 ### Variabel Dalam Dataset (2/2)
 
-**Gejala Utama WHO (Lanjutan):**
-- Dry-cough (binary)
-- Sore-throat (binary)
+**Aktivitas di Aplikasi:**
 
-**Gejala Tambahan:**
-- Pains, Nasal-congestion, Runny-nose, Diarrhea, Other-symptoms (Semua binary)
+- support_tickets (integer)
+- days_since_last_login (integer)
 
 **Target:**
-- Severity (Mild, Moderate, Severe)
+
+- churned (Churn/ Aktif)
 
 ---
 
 ### Kualitas Data
 
-- Sudah melalui proses pembersihan.
-- Kombinasi label variabel lengkap.
-- Cocok untuk analisis prediktif & *pattern recognition*.
+- Tidak terdapat *missing value*.
+- Tidak ada data korup atau format tidak konsisten.
+- Cocok untuk analisis prediktif.
 
 ---
 
 <div class="center-title">
 <h1>Metodologi Penelitian</h1>
-<h3>Pendekatan Data Science Lifecycle</h3>
 </div>
 
 ---
 
-### Overview: Data Science Lifecycle
+### Metodologi Penelitian
 
+Penelitian ini terdiri dari 5 tahapan:
 
-
-Penelitian ini mengikuti 5 tahapan siklus standar:
-
-1.  **Data Ingestion:** Akuisisi dan validasi format data.
-2.  **Data Preparation:** Pembersihan dan transformasi fitur.
-3.  **Modeling:** Pelatihan algoritma klasifikasi.
-4.  **Evaluation:** Validasi kinerja model dengan metrik medis.
-5.  **Insight Generation:** Interpretasi hasil untuk pengambilan keputusan.
+1.  **Business Understanding:** Memahami permasalahan bisnis yang ingin diselesaikan. 
+2.  **Data Understanding:**  Analisis awal berupa statistik deskriptif
+3.  **Data Preparation:** Pembersihan dan transformasi fitur.
+4.  **Modeling:**  Pemodelan klasifikasi menggunakan algoritma Random Forest.
+5.  **Evaluasi:**  Mengevaluasi model menggunakan metrik performa
 
 ---
 
-### Tahap 1 & 2: Preparation 
+### Tahap 1 Business Understanding
 
-Kualitas model bergantung pada kualitas data :
+- Memahami bagaimana pelanggan Spotify dapat berhenti berlangganan berdasarkan perilaku dan pola penggunaan aplikasi 
 
-- **Data Cleaning:** Menangani *missing values* dan menghapus duplikasi entri.
-- **Feature Encoding:** Mengubah seluruh data kategorikal menjadi numerik menggunakan teknik.
-- **Handling Imbalance:** Agar model mampu mengenali kasus *Severe* yang jumlahnya lebih sedikit.
+- Churn dapat mempengaruhi pendapatan dan stabilitas pelanggan Spotify
 
 ---
 
-### Tahap 3: Modeling (Random Forest)
+### Tahap 2 Data Understanding
 
-Mengapa memilih Random Forest?
+- Analisis struktur data (str, summary).
 
-- **Ensemble Learning:** Menggabungkan hasil dari ratusan *Decision Trees* melalui mekanisme *Voting*.
-- **Anti-Overfitting:** Lebih stabil dibandingkan Decision Tree tunggal karena mengambil sampel data secara acak.
-- **Feature Importance:** Secara otomatis memberikan skor pada gejala mana yang paling berpengaruh terhadap keparahan.
+- Deteksi missing value & anomali.
 
----
+- Eksplorasi pola perilaku pengguna.
 
-### Tahap 4: Evaluation Strategy
-
-Kami tidak hanya melihat Akurasi, tetapi fokus pada **Sensitivity/Recall**:
-
-- **Skenario:** Jika pasien *Severe* diprediksi *Mild* (False Negative), pasien bisa meninggal.
-- **Target:** Memaksimalkan **Recall** untuk kelas *Severe*.
-- **Validasi:** Menggunakan **K-Fold Cross Validation** untuk memastikan model stabil di berbagai subset data.
+- Visualisasi distribusi dan hubungan variabel.
 
 ---
 
-### Tahap 5: Insight Generation
+### Tahap 3 Data Preparation
 
-- **Risk Mapping:** Memetakan kombinasi gejala yang memiliki probabilitas tinggi menjadi kritis.
-- **Geospatial Analysis:** Menganalisis apakah wilayah tertentu memiliki tren keparahan yang lebih tinggi.
-- **Association Rules:** Mencari pola "Jika Gejala A dan B muncul, maka 90% risiko Severe".
+- Menghapus/isi missing value.
+
+- Menghilangkan duplikasi.
+
+- Encoding variabel kategorikal → numerik.
+
+- Normalisasi/standarisasi fitur numerik.
+
+- Seleksi fitur yang relevan.
+
+---
+
+### Tahap 4 Modeling
+
+- Algoritma yang dipakai: Random Forest.
+- **Alasan Pemilihan:** 
+  - Stabil
+
+  - Tahan terhadap overfitting
+
+  - Mampu menangani banyak fitur
+  
+- **Data Bagi:** (70% training dan 30% test)
+
+---
+
+### Tahap 5 Evaluasi Model
+
+Metrik yang digunakan:
+
+- Akurasi
+- Precision
+- Recall
+- F1-score
+- Confusion Matrix
 
 ---
 
 <div class="center-title">
-<h1>Algoritma Klasifikasi & Rencana Implementasi</h1>
-<h3>Sub-Bab Metodologi</h3>
+<h1>Teknik dan Algoritma</h1>
 </div>
 
 ---
 
-### Outline
+### Random Forest 
 
-- Algoritma klasifikasi (fungsi mayor)
-- Teknik preprocessing (fungsi minor)
-- Analisis tambahan
-- Rencana implementasi (tools & timeline)
+Mengolah berbagai atribut perilaku pengguna Spotify dengan hasil yang akurat dan stabil.
 
 ---
 
-### Algoritma Klasifikasi
-
-- **Tujuan utama:** Memprediksi tingkat keparahan kasus berdasarkan gejala.
-- **Model yang digunakan:** Random Forest.
-- **Fokus:** Model mudah dijelaskan & Performa model.
+<div class="center-title">
+<h1>Rencana Implementasi</h1>
+</div>
 
 ---
 
-### Random Forest
+### Pengumpulan dan Pemahaman Data
 
-**Kelebihan**
-- Lebih tahan terhadap overfitting.
-- Dapat menangkap interaksi antar fitur.
-- Performa prediksi biasanya lebih stabil.
-
-**Peran dalam Penelitian**
-- Menjadi model pembanding.
-- Analisis *feature importance*.
-
+- Mengunduh dataset 
+- Memuat dataset ke dalam RStudio 
+- Meninjau struktur data 
+- Menganalisis karakteristik awal data
+- Menentukan fitur yang berpotensi memengaruhi status churn pengguna
 
 ---
 
-### Teknik Preprocessing
+### Pembersihan dan Pra-pemrosesan Data
 
-- Data Transformation
-- Feature Selection
-- Data Validation
-
----
-
-### Data Transformation
-
-- Mengubah variabel kategorikal menjadi numerik dengan *One-Hot Encoding*.
-- Menyeragamkan tipe data & format nilai.
-- Menangani kategori yang jarang muncul (digabung jadi "lainnya").
+- Menangani missing values 
+- Menghapus duplikasi data 
+- Mengubah tipe data
+- Melakukan normalisasi atau standarisasi
+- Menghapus kolom yang tidak relevan
 
 ---
 
-### Feature Selection
+### Eksplorasi dan Analisis Data
 
-- **Metode:** Analisis korelasi & Feature importance dari Random Forest.
-- **Tujuan:** Mengurangi fitur yang kurang relevan (noise), menyederhanakan model, dan meningkatkan generalisasi.
-
----
-
-### Data Validation
-
-- **Stratified sampling:** Menjaga distribusi kelas severity di train/test.
-- **Cross-validation (k-fold):** Evaluasi model yang lebih stabil dan adil.
-- **Pembagian data:** Train, Validation, Test.
+- Membuat visualisasi distribusi data menggunakan ggplot2.
+- Menganalisis hubungan antara perilaku pengguna
+- Mengidentifikasi adanya outlier 
+- Melakukan analisis korelasi antar fitur
 
 ---
 
-### Analisis Tambahan
+### Seleksi Fitur (Feature Selection)
 
-- Feature Importance Analysis
-- Geospatial Analysis
-- Symptoms Pattern Analysis
-
----
-
-### Feature Importance Analysis
-
-- **Tujuan:** Mengukur pengaruh setiap gejala terhadap severity.
-- **Metode:** Permutation importance.
-- **Harapan:** Daftar gejala paling berpengaruh & insight deteksi dini.
+- Menentukan fitur signifikan.
+- Menghapus fitur korelasi rendah atau berlebihan (redundan).
+- Memastikan semua fitur sesuai format input untuk algoritma Random Forest.
 
 ---
 
-### Geospatial Analysis
+### Pembangunan model prediksi
 
-- **Analisis:** Sebaran kasus berdasarkan Negara & Wilayah.
-- **Pola:** Perbedaan tingkat keparahan & gejala dominan per wilayah.
-- **Insight:** Wilayah risiko tinggi & pola gejala lokal.
-
----
-
-### Symptoms Pattern Analysis
-
-- **Association Rule Mining:** Mencari kombinasi gejala (Contoh: Gejala A & B → Severity Tinggi).
-- **Network Analysis:** Visualisasi hubungan/ko-occurence antar gejala.
+- Membagi dataset menjadi data latih (70%) dan data uji (30%)
+- Melatih model Random Forest.
+- Melakukan tuning parameter
+- Menyimpan model terbaik untuk tahap evaluasi.
 
 ---
 
-### Rencana Implementasi 
+### Evaluasi
 
-- Data Preparation & Exploratory Analysis
-- Model Development & Evaluation
-- Advanced Analysis & Reporting
+Evaluasi dilakukan untuk menilai akurasi dan performa model dalam memprediksi churn
 
 ---
 
-### Data Preparation & EDA
+### Hasil
 
-**Fokus Kegiatan**
-
-- Load dataset, struktur data, cleaning.
-- Exploratory Data Analysis (EDA) & Visualisasi.
-- Preprocessing & Data splitting.
-
-**Deliverable:**
-
-- Dataset bersih, Laporan EDA, Pipeline preprocessing.
+1. Adanya segmentasi dari pengguna yang akan merepresentasikan pola dari perilaku pengguna.
+2. Mengidentifikasi faktor-faktor penyebab pengguna churn dengan menggunakan model klasifikasi
+3. Model prediksi churn yang dihasilkan performa baik, khususnya dalam mendeteksi pengguna yang berisiko churn
+4. Visualisasi diharapkan dapat membantu dalam memahami pola dan membuat narasi hasil analisis.
 
 ---
 
-### Model Development
+### Dampak
 
-**Fokus Kegiatan**
+**Dampak Akademik:**
 
-- Implementasi & training Random Forest.
-- Hyperparameter tuning & Evaluasi.
-- Analisis feature importance & Interpretasi.
+- Membantu mahasiswa memahami penerapan nyata teknik clustering dan klasifikasi pada data pengguna
+- Memperkuat kemampuan dalam eksplorasi data, preprocessing, modeling, dan evaluasi
 
-**Deliverable:**
+**Dampak Teknis:**
 
-- Model terlatih, Hasil evaluasi, Laporan feature importance.
-
----
-
-### Advanced Analysis
-
-**Fokus Kegiatan**
-
-- Association Rule & Geospatial analysis.
-- nterpretasi hasil & Visualisasi final.
-- Laporan akhir, Dokumentasi kode, Finalisasi PPT.
-
-**Deliverable:**
-
-- Laporan akhir, Slide presentasi, Kode rapi.
-
----
-
-### Hasil & Manfaat
-
-1. Model klasifikasi yang robust (prediksi severity klinis).
-2. Peta feature importance gejala dominan risiko tinggi.
-3. Aturan asosiasi: kombinasi gejala ke tingkat risiko.
-
----
-
-### Kesimpulan
-
-- Penelitian merancang model dan tools bantu keputusan untuk penanganan cepat.
-- **Input:** Data klinis & demografis.
-- **Proses:** Machine learning & analisis statistik.
-- **Impact:** Mendukung skrining dan triase pasien COVID-19 secara efektif.
+- Memberikan gambaran tentang bagaimana perilaku mendengarkan musik dapat dikelompokkan dan digunakan untuk memprediksi kemungkinan churn lebih awal.
+-  Menyediakan insight sederhana mengenai kebiasaan pengguna yang berisiko churn, segmen yang perlu diperhatikan, serta rekomendasi dasar untuk meningkatkan retensi pengguna.
 
 ---
 
 <div class="center-title">
 <h1>Terima Kasih!</h1>
-<h3>Kelompok 14</h3>
+<h3>Kelompok 12</h3>
 </div>

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Rival Fitrah Dermawa, Hotniel Diasi Sianturi, Anwar Faiz Fauzi" />
+  <meta name="dcterms.date" content="2025-11-19" />
+  <title>Analisis Segementasi dan Prediksi Churn Pengguna Spotify Berbasis Data Spotify Customer Churn Menggunakan Algoritma Random Forest</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal_template_files/reveal.js-4.2.1/dist/reset.css">
+  <link rel="stylesheet" href="reveal_template_files/reveal.js-4.2.1/dist/reveal.css">
+
+  <style type="text/css">
+    /* CSS from pandoc style.html() */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+                  </style>
+
+  <link rel="stylesheet" href="reveal_template_files/reveal.js-4.2.1/dist/theme/white.css" id="theme">
+
+
+  <style type="text/css">
+  /* some tweaks to reveal css */
+    .reveal h1 { font-size: 2.0em; }
+    .reveal h2 { font-size: 1.5em;  }
+    .reveal h3 { font-size: 1.25em;	}
+    .reveal h4 { font-size: 1em;	}
+
+    .reveal .slides>section,
+    .reveal .slides>section>section {
+      padding: 0px 0px;
+    }
+    .reveal table {
+      border-width: 1px;
+      border-spacing: 2px;
+      border-style: dotted;
+      border-color: gray;
+      border-collapse: collapse;
+      font-size: 0.7em;
+    }
+
+    .reveal table th {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      font-weight: bold;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+    .reveal table td {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      border-style: dotted;
+      border-color: gray;
+    }
+  </style>
+
+    <script src="reveal_template_files/header-attrs-2.29/header-attrs.js"></script>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">Analisis Segementasi dan Prediksi Churn Pengguna
+Spotify Berbasis Data Spotify Customer Churn Menggunakan Algoritma
+Random Forest</h1>
+  <h1 class="subtitle">Proyek Data Mining - Kelompok 12</h1>
+  <h2 class="author">Rival Fitrah Dermawa, Hotniel Diasi Sianturi, Anwar
+Faiz Fauzi</h2>
+  <h3 class="date">2025-11-19</h3>
+</section>
+
+<section class="slide level2">
+
+<style type="text/css">
+/* 1. IMPORT FONT POPPINS */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+  --spotify-green: #1DB954;
+  --spotify-black: #191414;
+  --spotify-dark: #121212;
+  --spotify-grey: #b3b3b3;
+}
+
+/* Background keseluruhan */
+.reveal {
+  background-color: var(--spotify-black) !important;
+  color: #ffffff !important;
+}
+
+/* Font global */
+.reveal, .reveal h1, .reveal h2, .reveal h3, .reveal p, .reveal li {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Heading */
+.reveal h1, .reveal h2, .reveal h3 {
+  color: var(--spotify-green) !important;
+  font-weight: 700 !important;
+  text-transform: none;
+}
+
+/* Title slide */
+#title-slide h1 {
+  font-size: 1.4em !important;
+  color: var(--spotify-green) !important;
+}
+#title-slide .subtitle {
+  color: #ffffff !important;
+  font-size: 1.0em !important;
+}
+#title-slide .author {
+  font-size: 0.9em !important;
+  color: var(--spotify-grey) !important;
+}
+#title-slide .date {
+  color: var(--spotify-grey) !important;
+}
+
+/* List / bullet box */
+.reveal .slides section ul, 
+.reveal .slides section ol {
+  background-color: var(--spotify-dark) !important;
+  border-left: 6px solid var(--spotify-green) !important;
+  padding: 15px 25px;
+  border-radius: 8px;
+  width: 90%;
+  margin: 0 auto;
+  box-shadow: 0px 0px 12px rgba(29, 185, 84, 0.15);
+}
+
+/* Tulisan list */
+.reveal li, .reveal p {
+  font-size: 24px !important;
+  color: #ffffff !important;
+}
+
+/* Center title (section besar) */
+.center-title h1 {
+  color: var(--spotify-green) !important;
+  font-size: 1.8em !important;
+}
+.center-title h3 {
+  color: var(--spotify-grey) !important;
+  font-size: 1.0em !important;
+}
+
+</style>
+<h3 id="latar-belakang-masalah">Latar Belakang Masalah</h3>
+<ul>
+<li>Pelanggan dapat dengan mudah menggunakan haknya untuk berpindah
+penyedia layanan dari satu aplikasi ke aplikasi lainnya.</li>
+<li>Churn pelanggan mengacu pada kehilangan pelanggan berkala dalam
+sebuah organisasi.</li>
+<li>Aktivitas churn sangat berpengaruh terhadap total profit dan citra
+bisnis, sehingga sebaiknya dapat diprediksi dan dicegah.</li>
+<li>Data mining mengidentifikasi churnes lebih awal sebelum mereka
+pindah.</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="sumber-dan-karakteristik-data">Sumber dan Karakteristik
+Data</h3>
+<ul>
+<li><strong>Sumber:</strong> Dataset publik <em>Spotify Customer
+Churn</em> (Kaggle)</li>
+<li><strong>Dasar:</strong> Berisi informasi demografi, perilaku
+mendengarkan, dan status langganan pengguna.</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="karakteristik-data">Karakteristik Data</h3>
+<ul>
+<li><strong>Jumlah Data:</strong> 1,000 kombinasi unik (kategori)</li>
+<li><strong>Struktur:</strong> File CSV</li>
+<li><strong>Tipe Data:</strong> Campuran kategorikal &amp; numerik</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="variabel-dalam-dataset-12">Variabel Dalam Dataset (1/2)</h3>
+<p><strong>Informasi Langganan:</strong></p>
+<ul>
+<li>subscription_type (kategorikal)</li>
+<li>country (kategorikal)</li>
+</ul>
+<p><strong>Aktivitas Mendengarkan:</strong></p>
+<ul>
+<li>avg_daily_minutes (numeric)</li>
+<li>number_of_playlists (integer)</li>
+<li>top_genre (kategorikal)</li>
+<li>skips_per_day (integer)</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="variabel-dalam-dataset-22">Variabel Dalam Dataset (2/2)</h3>
+<p><strong>Aktivitas di Aplikasi:</strong></p>
+<ul>
+<li>support_tickets (integer)</li>
+<li>days_since_last_login (integer)</li>
+</ul>
+<p><strong>Target:</strong></p>
+<ul>
+<li>churned (Churn/ Aktif)</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="kualitas-data">Kualitas Data</h3>
+<ul>
+<li>Tidak terdapat <em>missing value</em>.</li>
+<li>Tidak ada data korup atau format tidak konsisten.</li>
+<li>Cocok untuk analisis prediktif.</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<div class="center-title">
+<h1>
+Metodologi Penelitian
+</h1>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="metodologi-penelitian">Metodologi Penelitian</h3>
+<p>Penelitian ini terdiri dari 5 tahapan:</p>
+<ol type="1">
+<li><strong>Business Understanding:</strong> Memahami permasalahan
+bisnis yang ingin diselesaikan.</li>
+<li><strong>Data Understanding:</strong> Analisis awal berupa statistik
+deskriptif</li>
+<li><strong>Data Preparation:</strong> Pembersihan dan transformasi
+fitur.</li>
+<li><strong>Modeling:</strong> Pemodelan klasifikasi menggunakan
+algoritma Random Forest.</li>
+<li><strong>Evaluasi:</strong> Mengevaluasi model menggunakan metrik
+performa</li>
+</ol>
+</section>
+<section class="slide level2">
+
+<h3 id="tahap-1-business-understanding">Tahap 1 Business
+Understanding</h3>
+<ul>
+<li><p>Memahami bagaimana pelanggan Spotify dapat berhenti berlangganan
+berdasarkan perilaku dan pola penggunaan aplikasi</p></li>
+<li><p>Churn dapat mempengaruhi pendapatan dan stabilitas pelanggan
+Spotify</p></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="tahap-2-data-understanding">Tahap 2 Data Understanding</h3>
+<ul>
+<li><p>Analisis struktur data (str, summary).</p></li>
+<li><p>Deteksi missing value &amp; anomali.</p></li>
+<li><p>Eksplorasi pola perilaku pengguna.</p></li>
+<li><p>Visualisasi distribusi dan hubungan variabel.</p></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="tahap-3-data-preparation">Tahap 3 Data Preparation</h3>
+<ul>
+<li><p>Menghapus/isi missing value.</p></li>
+<li><p>Menghilangkan duplikasi.</p></li>
+<li><p>Encoding variabel kategorikal → numerik.</p></li>
+<li><p>Normalisasi/standarisasi fitur numerik.</p></li>
+<li><p>Seleksi fitur yang relevan.</p></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="tahap-4-modeling">Tahap 4 Modeling</h3>
+<ul>
+<li>Algoritma yang dipakai: Random Forest.</li>
+<li><strong>Alasan Pemilihan:</strong>
+<ul>
+<li><p>Stabil</p></li>
+<li><p>Tahan terhadap overfitting</p></li>
+<li><p>Mampu menangani banyak fitur</p></li>
+</ul></li>
+<li><strong>Data Bagi:</strong> (70% training dan 30% test)</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="tahap-5-evaluasi-model">Tahap 5 Evaluasi Model</h3>
+<p>Metrik yang digunakan:</p>
+<ul>
+<li>Akurasi</li>
+<li>Precision</li>
+<li>Recall</li>
+<li>F1-score</li>
+<li>Confusion Matrix</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<div class="center-title">
+<h1>
+Teknik dan Algoritma
+</h1>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="random-forest">Random Forest</h3>
+<p>Mengolah berbagai atribut perilaku pengguna Spotify dengan hasil yang
+akurat dan stabil.</p>
+</section>
+<section class="slide level2">
+
+<div class="center-title">
+<h1>
+Rencana Implementasi
+</h1>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="pengumpulan-dan-pemahaman-data">Pengumpulan dan Pemahaman
+Data</h3>
+<ul>
+<li>Mengunduh dataset</li>
+<li>Memuat dataset ke dalam RStudio</li>
+<li>Meninjau struktur data</li>
+<li>Menganalisis karakteristik awal data</li>
+<li>Menentukan fitur yang berpotensi memengaruhi status churn
+pengguna</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="pembersihan-dan-pra-pemrosesan-data">Pembersihan dan
+Pra-pemrosesan Data</h3>
+<ul>
+<li>Menangani missing values</li>
+<li>Menghapus duplikasi data</li>
+<li>Mengubah tipe data</li>
+<li>Melakukan normalisasi atau standarisasi</li>
+<li>Menghapus kolom yang tidak relevan</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="eksplorasi-dan-analisis-data">Eksplorasi dan Analisis Data</h3>
+<ul>
+<li>Membuat visualisasi distribusi data menggunakan ggplot2.</li>
+<li>Menganalisis hubungan antara perilaku pengguna</li>
+<li>Mengidentifikasi adanya outlier</li>
+<li>Melakukan analisis korelasi antar fitur</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="seleksi-fitur-feature-selection">Seleksi Fitur (Feature
+Selection)</h3>
+<ul>
+<li>Menentukan fitur signifikan.</li>
+<li>Menghapus fitur korelasi rendah atau berlebihan (redundan).</li>
+<li>Memastikan semua fitur sesuai format input untuk algoritma Random
+Forest.</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="pembangunan-model-prediksi">Pembangunan model prediksi</h3>
+<ul>
+<li>Membagi dataset menjadi data latih (70%) dan data uji (30%)</li>
+<li>Melatih model Random Forest.</li>
+<li>Melakukan tuning parameter</li>
+<li>Menyimpan model terbaik untuk tahap evaluasi.</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="evaluasi">Evaluasi</h3>
+<p>Evaluasi dilakukan untuk menilai akurasi dan performa model dalam
+memprediksi churn</p>
+</section>
+<section class="slide level2">
+
+<h3 id="hasil">Hasil</h3>
+<ol type="1">
+<li>Adanya segmentasi dari pengguna yang akan merepresentasikan pola
+dari perilaku pengguna.</li>
+<li>Mengidentifikasi faktor-faktor penyebab pengguna churn dengan
+menggunakan model klasifikasi</li>
+<li>Model prediksi churn yang dihasilkan performa baik, khususnya dalam
+mendeteksi pengguna yang berisiko churn</li>
+<li>Visualisasi diharapkan dapat membantu dalam memahami pola dan
+membuat narasi hasil analisis.</li>
+</ol>
+</section>
+<section class="slide level2">
+
+<h3 id="dampak">Dampak</h3>
+<p><strong>Dampak Akademik:</strong></p>
+<ul>
+<li>Membantu mahasiswa memahami penerapan nyata teknik clustering dan
+klasifikasi pada data pengguna</li>
+<li>Memperkuat kemampuan dalam eksplorasi data, preprocessing, modeling,
+dan evaluasi</li>
+</ul>
+<p><strong>Dampak Teknis:</strong></p>
+<ul>
+<li>Memberikan gambaran tentang bagaimana perilaku mendengarkan musik
+dapat dikelompokkan dan digunakan untuk memprediksi kemungkinan churn
+lebih awal.</li>
+<li>Menyediakan insight sederhana mengenai kebiasaan pengguna yang
+berisiko churn, segmen yang perlu diperhatikan, serta rekomendasi dasar
+untuk meningkatkan retensi pengguna.</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<div class="center-title">
+<h1>
+Terima Kasih!
+</h1>
+<h3>
+Kelompok 12
+</h3>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="reveal_template_files/reveal.js-4.2.1/dist/reveal.js"></script>
+  
+  <!-- reveal.js plugins -->
+  
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: true,
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: true,
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'bottom-right',
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+        // Display a presentation progress bar
+        progress: true,
+        // Can be used to limit the contexts in which the slide number appears
+        showSlideNumber: 'all',
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+        // Push each slide change to the browser history
+        // Implies `hash: true`
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: true,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'default',
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: true,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition speed
+        transitionSpeed: 'default', // default/fast/slow
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'fade', // none/fade/slide/convex/concave/zoom
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+        // The display mode that will be used to show slides
+        display: 'block',
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+
+
+        // Optional reveal.js plugins
+        plugins: [
+        ]
+      });
+
+    </script>
+  <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+<script>
+  (function() {
+    if (window.jQuery) {
+      Reveal.addEventListener( 'slidechanged', function(event) {  
+        window.jQuery(event.previousSlide).trigger('hidden');
+        window.jQuery(event.currentSlide).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+
+  </body>
+</html>

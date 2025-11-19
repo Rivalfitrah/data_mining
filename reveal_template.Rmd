@@ -1,37 +1,367 @@
 ---
-title: "Template Presentasi Reveal.js"
-subtitle: "Judul Sub-Bab"
-author: "Nama Kelompok"
+title: "Klasifikasi Tingkat Keparahan COVID-19"
+subtitle: "Algoritma Random Forest"
+author: "Kelompok 14"
 date: "`r Sys.Date()`"
 output:
   revealjs::revealjs_presentation:
-    theme: simple
-    transition: fade
+    theme: white
+    transition: slide
+    center: true
+    self_contained: false
 ---
 
-### Slide Judul
-<div class="center middle">
+<style type="text/css">
+/* 1. IMPORT FONT POPPINS */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
-# Judul Presentasi  
-### Subjudul Presentasi
+/* 2. PENGATURAN FONT GLOBAL (YANG DIUBAH) */
+.reveal, .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal p, .reveal li {
+  font-family: 'Poppins', sans-serif !important;
+  color: #333;
+}
 
+/* Mengatur ukuran teks isi (list & paragraf) menjadi lebih kecil */
+.reveal p, .reveal li {
+  font-size: 24px !important; /* Ukuran font diperkecil (Standar revealjs biasanya 30px+) */
+  line-height: 1.6 !important; /* Jarak antar baris diperlebar agar rapi */
+}
+
+/* 3. JUDUL SLIDE (DIPERKECIL) */
+.reveal h3 {
+  font-size: 1.3em !important; /* Ukuran judul diperkecil */
+  color: #1565c0;
+  text-transform: none;
+  font-weight: 600;
+  border-bottom: 2px solid #e3f2fd;
+  padding-bottom: 10px;
+  margin-bottom: 20px !important;
+}
+
+/* 4. OTOMATISASI KOTAK BIRU */
+.reveal .slides section ul, 
+.reveal .slides section ol {
+  background-color: #e3f2fd;
+  border-left: 6px solid #1565c0;
+  padding: 15px 25px; /* Padding sedikit dikurangi */
+  border-radius: 8px;
+  display: block;
+  width: 90%; 
+  margin: 0 auto;
+  text-align: left;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+}
+
+.reveal .slides section li {
+  margin-bottom: 8px; /* Jarak antar poin */
+}
+
+/* 5. KHUSUS JUDUL TENGAH BESAR (Algoritma Klasifikasi) */
+.center-title {
+  margin-top: 10%;
+  text-align: center;
+}
+.center-title h1 {
+  color: #1565c0;
+  font-weight: bold;
+  font-size: 1.8em !important; /* SAYA PERKECIL DARI 2.5em KE 1.8em AGAR MUAT */
+  line-height: 1.2 !important;
+}
+.center-title h3 {
+  font-size: 1.0em !important;
+  color: #555;
+  border: none;
+}
+</style>
+
+### Latar Belakang Masalah
+
+- COVID-19 adalah tantangan besar dalam deteksi dan penanganan pasien di skala global.
+- Gejala seperti demam, batuk, dan kesulitan bernapas adalah indikator tingkat keparahan.
+- Kombinasi gejala sering kompleks dan membutuhkan analisis sistematis.
+- Data mining meningkatkan akurasi skrining dan klasifikasi pasien.
+- Data gejala & demografi standar WHO mendukung pengambilan keputusan klinis.
+
+---
+
+### Sumber dan Karakteristik Data
+
+- **Sumber:** Dataset publik "COVID-19 Symptoms and Severity".
+- **Dasar:** Berdasarkan pedoman WHO & Kemenkes India, difokuskan pada gejala standar.
+
+---
+
+### Karakteristik Data
+
+- **Jumlah Data:** 316,800 kombinasi unik (kategori)
+- **Struktur:** File CSV
+- **Tipe Data:** Semua variabel kategorikal
+
+---
+
+### Variabel Dalam Dataset (1/2)
+
+**Demografis & Konteks:**
+- Country (kategorikal)
+- Age (kelompok usia, kategorikal)
+- Contact (riwayat kontak, binary)
+
+**Gejala Utama WHO:**
+- Fever (binary)
+- Tiredness (binary)
+- Difficulty-in-breathing (binary)
+
+---
+
+### Variabel Dalam Dataset (2/2)
+
+**Gejala Utama WHO (Lanjutan):**
+- Dry-cough (binary)
+- Sore-throat (binary)
+
+**Gejala Tambahan:**
+- Pains, Nasal-congestion, Runny-nose, Diarrhea, Other-symptoms (Semua binary)
+
+**Target:**
+- Severity (Mild, Moderate, Severe)
+
+---
+
+### Kualitas Data
+
+- Sudah melalui proses pembersihan.
+- Kombinasi label variabel lengkap.
+- Cocok untuk analisis prediktif & *pattern recognition*.
+
+---
+
+<div class="center-title">
+<h1>Metodologi Penelitian</h1>
+<h3>Pendekatan Data Science Lifecycle</h3>
 </div>
 
 ---
 
-### Contoh Slide Isi
-- Poin 1
-- Poin 2
-- Poin 3
+### Overview: Data Science Lifecycle
+
+
+
+Penelitian ini mengikuti 5 tahapan siklus standar:
+
+1.  **Data Ingestion:** Akuisisi dan validasi format data.
+2.  **Data Preparation:** Pembersihan dan transformasi fitur.
+3.  **Modeling:** Pelatihan algoritma klasifikasi.
+4.  **Evaluation:** Validasi kinerja model dengan metrik medis.
+5.  **Insight Generation:** Interpretasi hasil untuk pengambilan keputusan.
 
 ---
 
-### Slide Dengan Kode R
-```{r}
-plot(cars)
-```
+### Tahap 1 & 2: Preparation 
+
+Kualitas model bergantung pada kualitas data :
+
+- **Data Cleaning:** Menangani *missing values* dan menghapus duplikasi entri.
+- **Feature Encoding:** Mengubah seluruh data kategorikal menjadi numerik menggunakan teknik.
+- **Handling Imbalance:** Agar model mampu mengenali kasus *Severe* yang jumlahnya lebih sedikit.
 
 ---
 
-### Slide Penutup
-# Terima Kasih!
+### Tahap 3: Modeling (Random Forest)
+
+Mengapa memilih Random Forest?
+
+- **Ensemble Learning:** Menggabungkan hasil dari ratusan *Decision Trees* melalui mekanisme *Voting*.
+- **Anti-Overfitting:** Lebih stabil dibandingkan Decision Tree tunggal karena mengambil sampel data secara acak.
+- **Feature Importance:** Secara otomatis memberikan skor pada gejala mana yang paling berpengaruh terhadap keparahan.
+
+---
+
+### Tahap 4: Evaluation Strategy
+
+Kami tidak hanya melihat Akurasi, tetapi fokus pada **Sensitivity/Recall**:
+
+- **Skenario:** Jika pasien *Severe* diprediksi *Mild* (False Negative), pasien bisa meninggal.
+- **Target:** Memaksimalkan **Recall** untuk kelas *Severe*.
+- **Validasi:** Menggunakan **K-Fold Cross Validation** untuk memastikan model stabil di berbagai subset data.
+
+---
+
+### Tahap 5: Insight Generation
+
+- **Risk Mapping:** Memetakan kombinasi gejala yang memiliki probabilitas tinggi menjadi kritis.
+- **Geospatial Analysis:** Menganalisis apakah wilayah tertentu memiliki tren keparahan yang lebih tinggi.
+- **Association Rules:** Mencari pola "Jika Gejala A dan B muncul, maka 90% risiko Severe".
+
+---
+
+<div class="center-title">
+<h1>Algoritma Klasifikasi & Rencana Implementasi</h1>
+<h3>Sub-Bab Metodologi</h3>
+</div>
+
+---
+
+### Outline
+
+- Algoritma klasifikasi (fungsi mayor)
+- Teknik preprocessing (fungsi minor)
+- Analisis tambahan
+- Rencana implementasi (tools & timeline)
+
+---
+
+### Algoritma Klasifikasi
+
+- **Tujuan utama:** Memprediksi tingkat keparahan kasus berdasarkan gejala.
+- **Model yang digunakan:** Random Forest.
+- **Fokus:** Model mudah dijelaskan & Performa model.
+
+---
+
+### Random Forest
+
+**Kelebihan**
+- Lebih tahan terhadap overfitting.
+- Dapat menangkap interaksi antar fitur.
+- Performa prediksi biasanya lebih stabil.
+
+**Peran dalam Penelitian**
+- Menjadi model pembanding.
+- Analisis *feature importance*.
+
+
+---
+
+### Teknik Preprocessing
+
+- Data Transformation
+- Feature Selection
+- Data Validation
+
+---
+
+### Data Transformation
+
+- Mengubah variabel kategorikal menjadi numerik dengan *One-Hot Encoding*.
+- Menyeragamkan tipe data & format nilai.
+- Menangani kategori yang jarang muncul (digabung jadi "lainnya").
+
+---
+
+### Feature Selection
+
+- **Metode:** Analisis korelasi & Feature importance dari Random Forest.
+- **Tujuan:** Mengurangi fitur yang kurang relevan (noise), menyederhanakan model, dan meningkatkan generalisasi.
+
+---
+
+### Data Validation
+
+- **Stratified sampling:** Menjaga distribusi kelas severity di train/test.
+- **Cross-validation (k-fold):** Evaluasi model yang lebih stabil dan adil.
+- **Pembagian data:** Train, Validation, Test.
+
+---
+
+### Analisis Tambahan
+
+- Feature Importance Analysis
+- Geospatial Analysis
+- Symptoms Pattern Analysis
+
+---
+
+### Feature Importance Analysis
+
+- **Tujuan:** Mengukur pengaruh setiap gejala terhadap severity.
+- **Metode:** Permutation importance.
+- **Harapan:** Daftar gejala paling berpengaruh & insight deteksi dini.
+
+---
+
+### Geospatial Analysis
+
+- **Analisis:** Sebaran kasus berdasarkan Negara & Wilayah.
+- **Pola:** Perbedaan tingkat keparahan & gejala dominan per wilayah.
+- **Insight:** Wilayah risiko tinggi & pola gejala lokal.
+
+---
+
+### Symptoms Pattern Analysis
+
+- **Association Rule Mining:** Mencari kombinasi gejala (Contoh: Gejala A & B → Severity Tinggi).
+- **Network Analysis:** Visualisasi hubungan/ko-occurence antar gejala.
+
+---
+
+### Rencana Implementasi 
+
+- Data Preparation & Exploratory Analysis
+- Model Development & Evaluation
+- Advanced Analysis & Reporting
+
+---
+
+### Data Preparation & EDA
+
+**Fokus Kegiatan**
+
+- Load dataset, struktur data, cleaning.
+- Exploratory Data Analysis (EDA) & Visualisasi.
+- Preprocessing & Data splitting.
+
+**Deliverable:**
+
+- Dataset bersih, Laporan EDA, Pipeline preprocessing.
+
+---
+
+### Model Development
+
+**Fokus Kegiatan**
+
+- Implementasi & training Random Forest.
+- Hyperparameter tuning & Evaluasi.
+- Analisis feature importance & Interpretasi.
+
+**Deliverable:**
+
+- Model terlatih, Hasil evaluasi, Laporan feature importance.
+
+---
+
+### Advanced Analysis
+
+**Fokus Kegiatan**
+
+- Association Rule & Geospatial analysis.
+- nterpretasi hasil & Visualisasi final.
+- Laporan akhir, Dokumentasi kode, Finalisasi PPT.
+
+**Deliverable:**
+
+- Laporan akhir, Slide presentasi, Kode rapi.
+
+---
+
+### Hasil & Manfaat
+
+1. Model klasifikasi yang robust (prediksi severity klinis).
+2. Peta feature importance gejala dominan risiko tinggi.
+3. Aturan asosiasi: kombinasi gejala ke tingkat risiko.
+
+---
+
+### Kesimpulan
+
+- Penelitian merancang model dan tools bantu keputusan untuk penanganan cepat.
+- **Input:** Data klinis & demografis.
+- **Proses:** Machine learning & analisis statistik.
+- **Impact:** Mendukung skrining dan triase pasien COVID-19 secara efektif.
+
+---
+
+<div class="center-title">
+<h1>Terima Kasih!</h1>
+<h3>Kelompok 14</h3>
+</div>

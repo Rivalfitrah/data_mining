@@ -1,0 +1,37 @@
+---
+title: "Template Presentasi Reveal.js"
+subtitle: "Judul Sub-Bab"
+author: "Nama Kelompok"
+date: "`r Sys.Date()`"
+output:
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: fade
+---
+
+### Slide Judul
+<div class="center middle">
+
+# Judul Presentasi  
+### Subjudul Presentasi
+
+</div>
+
+---
+
+### Contoh Slide Isi
+- Poin 1
+- Poin 2
+- Poin 3
+
+---
+
+### Slide Dengan Kode R
+```{r}
+plot(cars)
+```
+
+---
+
+### Slide Penutup
+# Terima Kasih!

@@ -1,0 +1,349 @@
+---
+title: \large\bfseries{Kelompok 12 Kelas B}
+author: "Rival Fitrah Dermawan | Hotniel Diasi Sianturi | Anwar Faiz Fauzi"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    citation_package: natbib
+    template: bwHandout.tex
+    includes:
+       in_header: preamble.tex
+    keep_tex: false
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    latex_engine: xelatex
+#lot: true
+lof: true    
+fontsize: 11pt
+geometry: margin=1in
+
+#nocite: | 
+#  @*
+
+my_subtitle: "(Proposal)"
+fancy: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=6.5cm]{gambar/vokasi.png}
+\end{figure}
+
+\addtocounter{section}{0}
+\setcounter{page}{1}
+
+\newpage
+
+\vspace{0.5cm}   
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,width=0.8\textwidth,center]
+\begin{center}
+\textbf{Analisis Segmentasi dan Prediksi Churn Menggunakan Dataset Spotify Customer Churn \\ dengan Algoritma Random Forest}
+\end{center}
+\end{tcolorbox}
+\vspace{0.5cm}
+
+# Analisis Segmentasi dan Prediksi Churn Menggunakan Dataset Spotify Customer Churn dengan Algoritma Random Forest
+
+## Latar Belakang Masalah
+
+Spotify merupakan salah satu platform streaming musik terbesar di dunia, dengan ratusan juta pengguna aktif yang terdiri dari pengguna gratis dan pengguna berlangganan Premium. Sebagai layanan digital, mempertahankan pelanggan menjadi hal yang sangat penting karena pengguna dapat dengan mudah berpindah ke platform lain. Kondisi ini membuat masalah customer churn—atau berhentinya pelanggan menggunakan layanan—menjadi perhatian utama bagi perusahaan.
+
+Churn dapat berdampak langsung pada pendapatan dan keberlanjutan bisnis. Oleh sebab itu, dibutuhkan metode yang mampu memprediksi pengguna mana yang berisiko churn sehingga perusahaan dapat melakukan tindakan preventif. Dalam penelitian ini, dilakukan analisis dan prediksi churn menggunakan algoritma Random Forest pada dataset Spotify Customer Churn. Tujuan dari proses ini adalah mengidentifikasi pola perilaku pengguna serta faktor–faktor yang memengaruhi keputusan mereka untuk berhenti menggunakan layanan, sehingga dapat menjadi dasar dalam strategi retensi pelanggan.
+
+
+## Rumusan masalah
+
+1. Bagaimana kondisi kualitas data pada dataset Spotify Customer Churn sebelum dilakukan proses analisis?
+
+2. Faktor–faktor apa saja yang berpotensi memengaruhi seorang pengguna melakukan churn?
+
+3. Bagaimana cara membangun model prediksi churn menggunakan algoritma Random Forest?
+
+4. Seberapa baik performa model Random Forest dalam memprediksi churn pada pengguna Spotify?
+
+5. Bagaimana hasil evaluasi model dapat digunakan sebagai dasar rekomendasi strategi retensi pengguna?
+
+## Tujuan
+
+1. Menganalisis dan membersihkan dataset Spotify Customer Churn agar siap digunakan untuk proses pemodelan.
+
+2. Mengidentifikasi variabel–variabel yang berpengaruh terhadap perilaku churn pengguna.
+
+3. Membangun model prediksi churn menggunakan algoritma Random Forest.
+
+4. Mengevaluasi performa model dengan menggunakan metrik seperti accuracy, precision, recall, dan F1-score.
+
+5. Memberikan insight dan rekomendasi berdasarkan hasil analisis untuk membantu perusahaan dalam mengurangi tingkat churn.
+
+# Persiapan Environment
+
+Langkah pertama yang dilakukan pada analisa ini adalah memanggil library yang diperlukan setelah melakukan instalasi pada library yang akan digunakan
+
+```{r message=FALSE, warning=FALSE}
+# load library
+library(tidyverse)
+library(randomForest)
+library(caret)
+library(smotefamily)
+library(ggplot2)
+
+```
+
+1. library tidyverse = library ini digunakan untuk memanipulasi dataset
+
+2. library randomforest = library ini digunakan untuk membangun model random forest
+
+3. libarry caret = library ini digunakan untuk membantu melakukan preprocessing data
+
+4. library smotefamily = library ini digunakan untuk mengatasi ketidakseimbangan kelas pada variabel target “churned” menggunakan algoritma SMOTE (Synthetic Minority Over-sampling Technique)
+
+5. library ggplot = digunakan untuk melakukan visualisasi data
+
+# Load data dari csv
+
+```{r message=FALSE, warning=FALSE}
+# load dataset
+spotify <- read_csv("data/spotify_churn_dataset.csv", show_col_types = FALSE)
+
+cat("6 Baris Data Pertama:\n")
+print(head(spotify))
+
+cat("\nStruktur Dataset Awal:\n")
+glimpse(spotify)
+
+```
+
+pada bagian ini isi dari dataset ditampilkan sebanyak 6 baris pertama untuk melihat gambaran awal dari struktur isi dataset serta melihat format dari dataset, kemudian menggunakan fungsi **glimpse** untuk melihat struktir data lebih lengkap dab mendetail
+
+
+## melakukan cek kualiitas data
+
+```{r warning=FALSE}
+# 1. Cek Data Hilang
+cat("\nCek Data Hilang (NA):\n")
+print(colSums(is.na(spotify)))
+
+# 2. Cek Data Duplikasi
+cat("\nCek Duplikasi:\n")
+print(sum(duplicated(spotify)))
+
+# 3. Cek Struktur Data
+cat("\nStruktur Dataset:\n")
+str(spotify)
+
+# 4. Cek Nilai Tidak Logis (Negatif) pada variabel numeric
+cat("\nCek nilai negatif pada avg_daily_minutes:\n")
+spotify %>% filter(avg_daily_minutes < 0) %>% print()
+
+cat("\nJumlah nilai negatif pada avg_daily_minutes:\n")
+print(sum(spotify$avg_daily_minutes < 0, na.rm = TRUE))
+
+```
+sebelum melakukan proses data preparation, kualiatas data dilakukan pengecekan terlebih dahulu untuk melihat apakah terdapat data yang hilang, atau terdapat duplikasi data, kemudian melakukan pengecekan apakah terdapat nilai yang tidak logis, pada kasus ini ditemukan nilai tidak logis dimana terdapat nilai minus pada kolom **avg_daily_minutes** .
+
+# Data Preparation
+
+## mengganti data yang kotor
+```{r warning=FALSE}
+# cek data kotor avg_daily_minutes
+spotify %>% 
+  filter(avg_daily_minutes < 0) %>% 
+  head()
+
+sum(spotify$avg_daily_minutes < 0, na.rm = TRUE)
+
+# Hitung median dari nilai yang valid (>= 0)
+median_val <- median(spotify$avg_daily_minutes[spotify$avg_daily_minutes >= 0], na.rm = TRUE)
+
+# Ganti nilai negatif dengan median
+spotify <- spotify %>%
+  mutate(avg_daily_minutes = ifelse(avg_daily_minutes < 0, median_val, avg_daily_minutes))
+
+cat("\nJumlah nilai negatif setelah perbaikan:\n")
+print(sum(spotify$avg_daily_minutes < 0))
+
+```
+Pada tahap data preparation, dilakukan pemeriksaan terhadap nilai-nilai yang tidak valid pada kolom **avg_daily_minutes**, Kolom ini merepresentasikan rata-rata durasi pemutaran musik harian pengguna,sehingga tidak mungkin nilai ini memiliki nilai negatif
+
+Langkah yang dilakukan
+
+* identifikasi nilai tidak valid menggunakan fungsi **filter()**
+
+* mengganti nilai dengan meggunakan median agar menjaga konsistensi dari distribusi data. dengan menggunakan fungsi dari **mutate()** dan **ifelse()**
+
+* Pengecekan ulang diakukan untuk memastikan data bersih dan tidak ada nilai yang tidak normal
+
+## menghapus kolom yang tidak diperlukan
+
+```{r warning=FALSE}
+# menghapus kolom user_id
+spotify_clean <- spotify %>% 
+  select(-user_id)
+
+```
+
+pada bagian ini dilakukan kolom user_id tidak digunakan untuk proses pemodelan
+
+
+## proses encoding untuk variabel numerik
+
+```{r warning=FALSE}
+# Membuat model dummy/encoding
+dummies_model <- dummyVars(churned ~ ., data = spotify_clean)
+
+# Ubah dataset menjadi numeric semua
+data_numeric <- predict(dummies_model, newdata = spotify_clean) %>% as.data.frame()
+
+# atasi error pada penulisan di dataset
+colnames(data_numeric) <- make.names(colnames(data_numeric))
+
+# Mengembalikan variabel target 'churned' ke dataset
+data_numeric$churned <- spotify_clean$churned
+
+```
+
+pada tahapan ini dilakukan proses variabel kategorikal menjadi numerik dikarenakan terdapat imabalance data sehingga akan dilakukan metode smote, sedangkan untuk melakukan smote ini diperlukan data dalam bentuk numerik
+
+# Modeling
+
+## membagi data latih 70 dan data uji 30
+
+Pada tahapan ini dilakukan proses pembangian data latih sebanyak 70 dan data uji sebanyak 30
+
+```{r warning=FALSE}
+set.seed(123)
+
+# data 70/30
+train_index <- createDataPartition(data_numeric$churned, p = 0.7, list = FALSE)
+
+train_data <- data_numeric[train_index, ]
+test_data  <- data_numeric[-train_index, ]
+
+cat("\nJumlah kelas sebelum SMOTE:\n")
+print(table(train_data$churned)) 
+
+```
+
+## Menangani Ketidakseimbangan Kelas dengan SMOTE
+
+```{r warning=FALSE}
+train_x <- train_data %>% select(-churned)
+train_y <- train_data$churned
+
+# SMOTE untuk menyeimbangkan jumlah kelas
+smote_output <- SMOTE(X = train_x, target = train_y, K = 5, dup_size = 0)
+
+train_smote <- smote_output$data
+
+# Rapikan kolom target
+colnames(train_smote)[ncol(train_smote)] <- "churned"
+colnames(train_smote) <- make.names(colnames(train_smote))
+
+# Pastikan target bertipe factor
+train_smote$churned <- as.factor(train_smote$churned)
+test_data$churned   <- as.factor(test_data$churned)
+
+cat("\nJumlah kelas setelah SMOTE:\n")
+print(table(train_smote$churned))
+
+```
+
+Untuk mengatasi data imbalance, digunakan metode SMOTE (Synthetic Minority Oversampling Technique) dari library smotefamily. Metode ini menghasilkan sampel sintetis (bukan duplikasi), sehingga kelas minoritas meningkat tanpa menyebabkan overfitting.
+
+## Membangun model random forest
+
+```{r warning=FALSE}
+
+rf_model <- randomForest(
+  churned ~ .,
+  data = train_smote,
+  ntree = 500,
+  mtry = 3,
+  importance = TRUE
+)
+
+cat("\nHasil Model Random Forest:\n")
+print(rf_model)
+
+```
+
+pada tahpan ini dilakukan permodelan menggunakan random forest, random forest digunakan model ini karena cocok untuk dataset tabular dan mampu menangani banyak fitur hasil encoding. Random Forest juga menyediakan informasi mengenai fitur apa yang paling berpengaruh terhadap prediksi.
+
+## visualisasi data sebelum dan sesudah menggunakan SMOTE
+
+```{r warning=FALSE}
+par(mfrow=c(1,2))
+barplot(table(train_data$churned), 
+        main="Sebelum SMOTE (Imbalanced)", col="red",
+        ylab="Jumlah Observasi")
+
+barplot(table(train_smote$churned), 
+        main="Setelah SMOTE (Balanced)", col="green",
+        ylab="Jumlah Observasi")
+
+par(mfrow=c(1,1))
+
+```
+
+pada visualisasi ini menunjukan perubahan kelas sebelum dan sesudah SMOTE 
+
+# Evaluation
+
+```{r warning=FALSE}
+# Prediksi menggunakan test_data (yang sudah di-encoded)
+pred <- predict(rf_model, test_data)
+
+# Tampilkan Confusion Matrix
+# Menggunakan mode = "prec_recall" (sudah diperbaiki case sensitivity-nya)
+cat("\nHasil Evaluasi (Confusion Matrix & Metrik):")
+confusionMatrix(pred, test_data$churned, positive = "1", mode = "prec_recall")
+
+# Cek Variable Importance (Fitur yang paling berpengaruh)
+varImpPlot(rf_model, main = "Variable Importance Random Forest")
+
+```
+
+pada evalusi ini hasil menunjukan model berhasil mencapai akurasi sebesar 0.84 yang berarti 84% prediksi model sudah sesuai dengan kondisi aktual pengguna. Namun, nilai recall untuk kelas churn (0.3333) menunjukkan bahwa model masih kesulitan dalam mendeteksi seluruh pengguna yang benar-benar churn.
+
+analisa dari metrik krusial menunjukan 
+
+* Tingkat Kegagalan Deteksi (Recall): Nilai Recall model ini sangat rendah, yaitu hanya 33.33%.
+
+* Nilai Prediksi tercatat sebanyak 60%
+
+Berdasarkan grafik, fitur yang memiliki pengaruh paling besar adalah avg_daily_minutes, support_tickets, subscription_type, dan days_since_last_login. Hal ini menunjukkan bahwa waktu penggunaan harian, frekuensi pengguna menghubungi layanan dukungan, jenis langganan yang digunakan, dan lama sejak terakhir login menjadi faktor penting dalam membedakan pengguna yang churn dan yang tetap aktif.
+
+# Kesimpulan dan saran
+
+## Kesimpulan 
+
+berdasarkan hasil dari penelitian ini dapat disimpulkan bahwa saat ini model berhasil menghasilkan akurasi sebesar 84% namun analisa dari matrix yang lebih mendalam menunjukan bahwa daya prediksi recall buruk sebesar 33.33% dan hasil precision sebesar 60%, oleh karena itu model ini belum bisa diimplementasikan untuk proeses bisnis karena bisa megakibatkan kerugian akibat recall yang tergolong kecil
+
+## saran
+
+untuk penelitian selanjutnya disarankan:
+
+* perlu difokuskan untuk meningkatkan nilai dari recall kedepannya
+
+* minimnya informasi yang didapat dari dataset oleh sebab itu perlu menambah fitur yang adapada dataset
+
+* Memperbaiki kualitas data untuk mengurangi nilai yang tidak logis
+
+
+
+\nocite{*}
+
+\newpage
+
+
+
+
+
+
+   

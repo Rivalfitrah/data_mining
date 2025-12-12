@@ -1,0 +1,92 @@
+% Fix for Pandoc LaTeX error: \pandocbounded undefined
+\newcommand{\pandocbounded}[1]{#1}
+
+\usepackage[indonesian]{babel}
+\usepackage{xcolor}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage[T1]{fontenc}
+\usepackage{tgpagella}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usepackage{forest}
+\usepackage{scrextend}
+\usepackage{changepage}
+\usepackage{menukeys}
+\usepackage{smartdiagram}
+\usepackage{tcolorbox}
+\usepackage{scrextend}
+\usepackage[font=small,skip=6pt]{caption}
+\usetikzlibrary{positioning,shapes.misc}
+\usetikzlibrary{mindmap}
+\usetikzlibrary{backgrounds, decorations.fractals}
+\usepackage{systeme}
+%\usepackage{biblatex}
+
+
+
+
+\usepackage{verbatimbox}
+\usepackage{listings}
+\usepackage{xcolor}
+
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+%\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{backcolour}{rgb}{0.85,0.85,0.85}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    xleftmargin=1.4cm % Menambahkan margin kiri 1 cm
+}
+
+\lstset{style=mystyle}
+
+
+\newenvironment{myindent}
+{\par\leftskip1cm\relax\rightskip1cm\relax}
+{\par\leftskip0cm\relax\rightskip0cm\relax}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\renewcommand\fbox{\fcolorbox{red}{white}}
+
+\hyphenation{menetap-kan dikelompok-kan}
+
+
+%%% table
+\usepackage{tabularx}
+\usepackage{enumitem}
+
+\setlist{nolistsep}
+\definecolor{green}{HTML}{66FF66}
+\definecolor{myGreen}{HTML}{009900}
+
+\renewcommand{\familydefault}{\sfdefault}
+\renewcommand{\arraystretch}{1.2}
+
+\usepackage{dirtree}
+\usetikzlibrary{trees}
+
+% Environment baru: indentasi kiri 1cm
+\newenvironment{indentpar}
+  {\par\begingroup\leftskip=1cm\noindent}
+  {\par\endgroup}
